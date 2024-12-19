@@ -10,8 +10,9 @@ import re
 
 translator = Translator()
 
-__all__ = ['ajuda', 'ppt', 'traduzir', 'ola', 'hello', 'play', 'stop', 'leave', 'volume', 'limpar'] #COMANDOS A SEREM IMPORTADOS
+__all__ = ['ajuda', 'ppt', 'traduzir', 'play', 'stop', 'skip', 'volume', 'leave', 'limpar'] #__COMANDOS IMPORTADOS EM PT-BR__
 
+#__COMANDOS BOT__PT-BR
 #COMANDO DE AJUDA
 @commands.command()
 async def ajuda(ctx):
@@ -24,7 +25,6 @@ async def ajuda(ctx):
         name="Comandos de Diversão",
         value=(
             "`!ppt`: Jogo de Pedra, Papel e Tesoura.\n"
-            # ""
         ),
         inline=False
     )
@@ -36,10 +36,11 @@ async def ajuda(ctx):
     embed.add_field(
         name="Comandos de Música",
         value=(
-            "`!play <url>`: Reproduz uma musica do YouTube usando o `NOME` ou `LINK`.\n"
-            "`!stop`: Para a música atual.\n"
-            "`!leave`: Desconecta o bot do canal de voz.\n"
-            "`!volume`: Permite que o usuario possa mudar o volume do bot por meio de `REAÇÕES`."
+            "`!play <url>`: O DJ Toca as musicas do YouTube usando o ``NOME`` ou ``LINK`` e podem ser separadas por ``,`` para reproduzir mais de uma.\n"
+            "`!stop`: O DJ Para a música atual.\n"
+            "`!skip`: O DJ Pula a música atual.\n"
+            "`!volume`: Permite que o usuario possa mudar o volume do DJ por meio de ``REAÇÕES``.\n"
+            "`!sair`: Desconecta o DJ da festa.\n"
         ),
         inline=False
     )
@@ -68,7 +69,7 @@ async def ppt(ctx, escolha: str):
     if escolha_usuario == escolha_bot:
         resultado = "Empate! 🤝"
     elif (escolha_usuario == "pedra" and escolha_bot == "tesoura") or \
-         (escolha_usuario == "papel" and escolha_bot == "pedra") or \
+        (escolha_usuario == "papel" and escolha_bot == "pedra") or \
         (escolha_usuario == "tesoura" and escolha_bot == "papel"):
         resultado = "Você venceu! 🎉"
     else:
@@ -87,8 +88,15 @@ async def traduzir(ctx, lingua: str, *, texto: str):
         print(f"Erro de tradução: {e}")
 
 # COMANDOS DE MUSICAS
+music_queue = [] #__Lista para armazenar as músicas na fila__
+music_cache = {} #__Dicionário para armazenar informações das músicas já baixadas__
+current_music = None  #__Variável para rastrear a música atual__
+manual_stop = False #__Variável para rastrear interrupções manuais__
+
 @commands.command()
-async def play(ctx, *, query):
+async def play(ctx, *, query=None):
+    global music_queue, music_cache, manual_stop, current_music
+
     if not ctx.author.voice:
         await ctx.send("Você precisa estar em um canal de voz para usar este comando!")
         return
@@ -99,56 +107,138 @@ async def play(ctx, *, query):
         await channel.connect()
     voice_client = ctx.voice_client
 
-    # Verificar se o bot já está tocando música
-    if voice_client.is_playing():
-        await ctx.send("Já estou tocando uma música. Use `!stop` para parar a música atual antes de reproduzir outra.")
+    # Resetar o estado de "manual_stop" sempre que uma música for adicionada ou retomada
+    manual_stop = False
+
+    # Se o comando for usado sem argumentos, retome a música atual, se existir
+    if query is None:
+        if current_music and not voice_client.is_playing():
+            await ctx.send(f"Retomando a música: **{current_music['title']}**")
+            await play_music(ctx, current_music)
+        elif voice_client.is_playing():
+            await ctx.send("Já estou tocando uma música.")
+        else:
+            await ctx.send("Não há nenhuma música para retomar.")
         return
 
-    # Verificar se a entrada é uma URL ou um termo de pesquisa
-    with yt_dlp.YoutubeDL({'format': 'bestaudio', 'noplaylist': True}) as ydl:
-        try:
-            if "http" in query:  # Caso seja uma URL
-                info = ydl.extract_info(query, download=False)
-            else:  # Caso seja um termo de pesquisa
-                search_info = ydl.extract_info(f"ytsearch:{query}", download=False)
-                info = search_info['entries'][0]  # Selecionar o primeiro resultado
-            audio_url = info['url']
-        except Exception as e:
-            await ctx.send("Houve um erro ao processar sua solicitação. Por favor, tente novamente.")
-            print(f"Erro ao buscar áudio: {e}")
-            return
+    # Dividir as músicas usando vírgula como separador
+    queries = [q.strip() for q in query.split(",")]
+    added_songs = []
 
-    # Reproduzir áudio com volume configurável
+    for query in queries:
+        # Verificar se a música já está no cache
+        if query in music_cache:
+            music_info = music_cache[query]
+            await ctx.send(f"**{music_info['title']}** foi encontrada no cache e adicionada à fila!")
+        else:
+            # Processar a música com yt-dlp
+            with yt_dlp.YoutubeDL({'format': 'bestaudio', 'noplaylist': True}) as ydl:
+                try:
+                    if "http" in query:  # Caso seja uma URL
+                        info = ydl.extract_info(query, download=False)
+                    else:  # Caso seja um termo de pesquisa
+                        search_info = ydl.extract_info(f"ytsearch:{query}", download=False)
+                        info = search_info['entries'][0]  # Selecionar o primeiro resultado
+
+                    music_info = {
+                        "title": info['title'],
+                        "url": info['url']
+                    }
+
+                    # Armazenar no cache
+                    music_cache[query] = music_info
+                    await ctx.send(f"**{music_info['title']}** foi processada e adicionada à fila!")
+                except Exception as e:
+                    await ctx.send(f"Houve um erro ao processar '{query}'. Por favor, tente novamente.")
+                    print(f"Erro ao buscar áudio: {e}")
+                    continue
+
+        # Verificar se a música já está na fila
+        if music_info["title"] in [music['title'] for music in music_queue]:
+            await ctx.send(f"A música **{music_info['title']}** já está na fila!")
+            continue
+
+        # Adicionar música à fila
+        music_queue.append(music_info)
+        added_songs.append(music_info["title"])
+
+    # Notificar quais músicas foram adicionadas à fila
+    if added_songs:
+        await ctx.send(f"As seguintes músicas foram adicionadas à fila: {', '.join(added_songs)}")
+
+    # Reproduzir música se o bot não estiver tocando
+    if not voice_client.is_playing():
+        await play_next(ctx)
+
+# Função para reproduzir a música
+async def play_music(ctx, music_info):
+    voice_client = ctx.voice_client
+
+    # Reproduzir áudio
+    def after_playing(error):
+        if error:
+            print(f"Erro ao tocar música: {error}")
+        # Garantir que o bot só chama a próxima música se manual_stop for False
+        if not manual_stop:
+            asyncio.run_coroutine_threadsafe(play_next(ctx), ctx.bot.loop)
+
     source = PCMVolumeTransformer(
-        FFmpegPCMAudio(audio_url, executable="C:/Program Files/ffmpeg/ffmpeg.exe"), # O ARQUIVO FFmpeg TEM QUE SER COLOCADO NESTE CAMINHO PARA QUE FUNCIONE CORRETAMENTE
+        FFmpegPCMAudio(music_info["url"], executable="C:/Program Files/ffmpeg/ffmpeg.exe"),
         volume=0.5  # Volume inicial de 50%
     )
-    voice_client.play(source, after=lambda e: print(f"Erro ao tocar música: {e}") if e else None)
-    await ctx.send(f"Tocando agora: {info['title']}")
+    voice_client.play(source, after=after_playing)
+
+    await ctx.send(f"Tocando agora: **{music_info['title']}**")
+
+# Função para tocar a próxima música na fila
+async def play_next(ctx):
+    global music_queue, manual_stop, current_music
+
+    if len(music_queue) == 0:
+        await ctx.send("A fila de músicas está vazia!")
+        current_music = None
+        return
+
+    # Verificar se o comando !stop foi usado
+    if manual_stop:
+        return
+
+    # Pegar a próxima música da fila
+    current_music = music_queue.pop(0)
+    await play_music(ctx, current_music)
 
 # PARAR MÚSICA
 @commands.command()
 async def stop(ctx):
+    global manual_stop
+
     if not ctx.voice_client:
         await ctx.send("Não estou em nenhum canal de voz no momento.")
         return
 
     if ctx.voice_client.is_playing():
-        ctx.voice_client.stop()
+        manual_stop = True  # Indicar que o stop foi acionado manualmente
+        ctx.voice_client.stop()  # Interromper a reprodução atual
         await ctx.send("A música foi parada.")
     else:
         await ctx.send("Não há nenhuma música tocando no momento.")
 
-# DESCONECTAR DO CANAL DE VOZ
+# SKIP MÚSICA
 @commands.command()
-async def leave(ctx):
+async def skip(ctx):
+    global music_queue, current_music
+
     if not ctx.voice_client:
-        await ctx.send("Não estou conectado a nenhum canal de voz.")
+        await ctx.send("Não estou em nenhum canal de voz no momento.")
         return
 
-    await ctx.voice_client.disconnect()
-    await ctx.send("Desconectado do canal de voz.")
-
+    if ctx.voice_client.is_playing():
+        await ctx.send(f"Pulando a música: **{current_music['title']}**")
+        ctx.voice_client.stop()  # Interrompe a música atual, acionando o `after_playing`
+        current_music = None  # Limpa a música atual
+    else:
+        await ctx.send("Não há nenhuma música tocando no momento.")
+        
 # VOLUME
 @commands.command()
 async def volume(ctx):
@@ -195,6 +285,16 @@ async def volume(ctx):
             embed.set_footer(text="Controle de volume expirado.")
             await message.edit(embed=embed)
             break
+
+# DESCONECTAR DO CANAL DE VOZ
+@commands.command()
+async def leave(ctx):
+    if not ctx.voice_client:
+        await ctx.send("Não estou conectado a nenhum canal de voz.")
+        return
+
+    await ctx.voice_client.disconnect()
+    await ctx.send("Desconectado do canal de voz.")
 
 # MODERAÇÃO
 @commands.command()
