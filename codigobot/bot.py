@@ -21,8 +21,8 @@ client.add_command(traduzir) #__COMANDO PARA FACILITAR A COMUNICAÇÃO ENTRE OS 
 client.add_command(play) #__COMANDO PARA O DJ TOCAR MÚSICA POR URL OU NOME__
 client.add_command(stop) #__COMANDO PARA O DJ PARAR__
 client.add_command(skip) #__COMANDO PARA O DJ PULAR A MÚSICA ATUAL__
-client.add_command(volume) #__COMANDO DE AJUSTE DE VOLUME__
-client.add_command(leave) #__COMANDO QUE TIRA O DJ DA FESTA__
+client.add_command(volume) #__COMANDO PARA O DJ AJUSTAR O VOLUME__
+client.add_command(leave) #__COMANDO PARA TIRAR O DJ DA FESTA__
 #__COMANDO DE MODERAÇÃO__
 client.add_command(limpar) #__COMANDO DE LIMPEZA DE MENSAGENS__
 
