@@ -7,53 +7,111 @@ import random
 from googletrans import Translator
 import aiohttp
 import re
+import json
 
 translator = Translator()
 
-__all__ = ['ajuda', 'ppt', 'traduzir', 'play', 'stop', 'skip', 'volume', 'leave', 'limpar'] #__COMANDOS IMPORTADOS EM PT-BR__
+__all__ = ['ajuda', 'traduzir', 'ppt', 'play', 'stop', 'skip', 'volume', 'leave', 'entre', 'clear'] #__COMANDOS IMPORTADOS__
 
 #__COMANDOS BOT__PT-BR
 #COMANDO DE AJUDA
+textos_ajuda = {
+    "pt": {
+        "titulo": "Menu de Ajuda",
+        "descricao": "Aqui está a lista de comandos disponíveis no ByteCode:",
+        "diversao": "Comandos de Diversão",
+        "traducao": "Comando de tradução",
+        "musica": "Comandos de Música",
+        "moderacao": "Comandos de Moderação",
+        "footer": "Desenvolvido por @Lucasmassaroto1",
+        "comandos": {
+            "traducao": "`!traduzir <idioma> <texto>`: Traduz o texto fornecido para o idioma especificado.",
+            "diversao": "`!ppt`: Jogo de Pedra, Papel e Tesoura.",
+            "musica": (
+                "`!play <url>`: O DJ toca músicas do YouTube usando o `NOME` ou `LINK`.\n"
+                "`!stop`: O DJ para a música atual.\n"
+                "`!skip`: O DJ pula a música atual.\n"
+                "`!volume`: Permite mudar o volume usando reações.\n"
+                "`!leave`: Desconecta o DJ da festa."
+            ),
+            "moderacao": (
+                "`!clear <quantidade>`: Apaga mensagens no canal.\n"
+                "`!entre <canal>`: Configura o canal de boas-vindas."
+            )
+        }
+    },
+    "en": {
+        "titulo": "Help Menu",
+        "descricao": "Here is the list of commands available in the ByteCode:",
+        "diversao": "Fun Commands",
+        "traducao": "Translation Command",
+        "musica": "Music Commands",
+        "moderacao": "Moderation Commands",
+        "footer": "Developed by @Lucasmassaroto1",
+        "comandos": {
+            "traducao": "`!translate <language> <text>`: Translates the given text to the specified language.",
+            "diversao": "`!ppt`: Rock, Paper, Scissors game.",
+            "musica": (
+                "`!play <url>`: The DJ plays songs from YouTube using `NAME` or `LINK`.\n"
+                "`!stop`: The DJ stops the current song.\n"
+                "`!skip`: The DJ skips the current song.\n"
+                "`!volume`: Allows volume adjustment using reactions.\n"
+                "`!leave`: Disconnects the DJ from the party."
+            ),
+            "moderacao": (
+                "`!clear <amount>`: Deletes a specified number of messages in the channel.\n"
+                "`!entre <channel>`: Sets the welcome channel."
+            ),
+        }
+    }
+}
+
 @commands.command()
 async def ajuda(ctx):
-    embed = discord.Embed(
-        title="Menu de Ajuda",
-        description="Aqui está a lista de comandos disponíveis no bot:",
-        color=discord.Color.green()
-    )
-    embed.add_field(
-        name="Comandos de Diversão",
-        value=(
-            "`!ppt`: Jogo de Pedra, Papel e Tesoura.\n"
-        ),
-        inline=False
-    )
-    embed.add_field(
-        name="Comando de tradução",
-        value="`!traduzir <idioma> <texto>`: Traduz o texto fornecido para o idioma especificado.",
-        inline=False
-    )
-    embed.add_field(
-        name="Comandos de Música",
-        value=(
-            "`!play <url>`: O DJ Toca as musicas do YouTube usando o ``NOME`` ou ``LINK`` e podem ser separadas por ``,`` para reproduzir mais de uma.\n"
-            "`!stop`: O DJ Para a música atual.\n"
-            "`!skip`: O DJ Pula a música atual.\n"
-            "`!volume`: Permite que o usuario possa mudar o volume do DJ por meio de ``REAÇÕES``.\n"
-            "`!sair`: Desconecta o DJ da festa.\n"
-        ),
-        inline=False
-    )
-    embed.add_field(
-        name="Comandos de Moderação",
-        value="`!limpar <quantidade>`: Apaga a quantidade especificada de mensagens no canal.",
-        inline=False
-    )
-    embed.set_footer(text="Desenvolvido por @Lucasmassaroto1")
+    # Envia mensagem inicial
+    msg = await ctx.send("Selecione o idioma para o menu de ajuda:\n🇧🇷 - Português\n🇺🇸 - English")
 
-    await ctx.send(embed=embed)
+    # Adiciona reações para seleção de idioma
+    await msg.add_reaction("🇧🇷")
+    await msg.add_reaction("🇺🇸")
 
-# COMANDOS DE DIVERSAO
+    def check(reaction, user):
+        return user == ctx.author and str(reaction.emoji) in ["🇧🇷", "🇺🇸"]
+
+    try:
+        reaction, user = await ctx.bot.wait_for("reaction_add", timeout=30.0, check=check)
+        idioma = "pt" if str(reaction.emoji) == "🇧🇷" else "en"
+
+        # Gera o embed no idioma escolhido
+        texto = textos_ajuda[idioma]
+        embed = discord.Embed(
+            title=texto["titulo"],
+            description=texto["descricao"],
+            color=discord.Color.green()
+        )
+        embed.add_field(name=texto["traducao"], value=texto["comandos"]["traducao"], inline=False)
+        embed.add_field(name=texto["diversao"], value=texto["comandos"]["diversao"], inline=False)
+        embed.add_field(name=texto["musica"], value=texto["comandos"]["musica"], inline=False)
+        embed.add_field(name=texto["moderacao"], value=texto["comandos"]["moderacao"], inline=False)
+        embed.set_footer(text=texto["footer"])
+
+        await ctx.send(embed=embed)
+
+    except TimeoutError:
+        await ctx.send("Você não selecionou um idioma a tempo. Tente novamente.")
+
+#COMANDO DE TRADUÇÃO
+@commands.command()
+async def traduzir(ctx, lingua: str, *, texto: str):
+    try:
+        traducao = translator.translate(texto, dest=lingua)
+        await ctx.send(f"Aqui está a Tradução para a Lingua ({lingua}): `{traducao.text}`")
+    except Exception as e:
+        await ctx.send("Ocorreu um erro ao tentar traduzir o texto. Por favor, tente novamente mais tarde.")
+        print(f"Erro de tradução: {e}")
+
+#COMANDO PARA DIVERSÃO
+#COMANDO DE PPT
 @commands.command()
 async def ppt(ctx, escolha: str):
     escolhas = ["pedra", "papel", "tesoura"]
@@ -77,17 +135,7 @@ async def ppt(ctx, escolha: str):
 
     await ctx.send(f"Você escolheu: {escolha_usuario}\n Eu escolhi: {escolha_bot}\n{resultado}")
 
-# COMANDO DE TRADUÇÃO
-@commands.command()
-async def traduzir(ctx, lingua: str, *, texto: str):
-    try:
-        traducao = translator.translate(texto, dest=lingua)
-        await ctx.send(f"Aqui está a Tradução para a Lingua ({lingua}): `{traducao.text}`")
-    except Exception as e:
-        await ctx.send("Ocorreu um erro ao tentar traduzir o texto. Por favor, tente novamente mais tarde.")
-        print(f"Erro de tradução: {e}")
-
-# COMANDOS DE MUSICAS
+#COMANDO DE MÚSICA
 music_queue = [] #__Lista para armazenar as músicas na fila__
 music_cache = {} #__Dicionário para armazenar informações das músicas já baixadas__
 current_music = None  #__Variável para rastrear a música atual__
@@ -207,7 +255,7 @@ async def play_next(ctx):
     current_music = music_queue.pop(0)
     await play_music(ctx, current_music)
 
-# PARAR MÚSICA
+#COMANDO PARA PALSAR A MUSICA
 @commands.command()
 async def stop(ctx):
     global manual_stop
@@ -223,7 +271,7 @@ async def stop(ctx):
     else:
         await ctx.send("Não há nenhuma música tocando no momento.")
 
-# SKIP MÚSICA
+#COMANDO PARA PULAR A MUSICA
 @commands.command()
 async def skip(ctx):
     global music_queue, current_music
@@ -238,8 +286,8 @@ async def skip(ctx):
         current_music = None  # Limpa a música atual
     else:
         await ctx.send("Não há nenhuma música tocando no momento.")
-        
-# VOLUME
+
+#COMANDO PARA MUDAR VOLUME
 @commands.command()
 async def volume(ctx):
     if not ctx.voice_client or not ctx.voice_client.source:
@@ -286,7 +334,7 @@ async def volume(ctx):
             await message.edit(embed=embed)
             break
 
-# DESCONECTAR DO CANAL DE VOZ
+#COMANDO PARA TIRAR O BOT DA FESTA
 @commands.command()
 async def leave(ctx):
     if not ctx.voice_client:
@@ -296,9 +344,119 @@ async def leave(ctx):
     await ctx.voice_client.disconnect()
     await ctx.send("Desconectado do canal de voz.")
 
-# MODERAÇÃO
+#COMANDOS DE MODERAÇÃO
+#COMANDO DE WELCOME
+# Dicionário para armazenar canais de boas-vindas
+welcome_channels = {}
+
+# Carregar canais salvos de um arquivo JSON
+try:
+    with open("welcome_channels.json", "r") as file:
+        welcome_channels = json.load(file)
+except FileNotFoundError:
+    welcome_channels = {}
+
+# Comando para configurar o canal de boas-vindas
 @commands.command()
-async def limpar(ctx, quantidade: int):
+@commands.has_permissions(administrator=True)
+async def entre(ctx, channel: discord.TextChannel = None, *, welcome_message: str = None):
+    embed = discord.Embed(
+        title="Configuração de Canal de Boas-Vindas",
+        description="Use este comando para configurar o canal onde as mensagens de boas-vindas serão enviadas.",
+        color=discord.Color.green()
+    )
+    
+    if channel:
+        guild_id = str(ctx.guild.id)
+        welcome_channels[guild_id] = {
+            "channel_id": channel.id,
+            "welcome_message": welcome_message or "Bem-vindo(a) ao servidor, {user.mention}! 🎉"
+        }
+
+        # Salvar no arquivo JSON
+        with open("welcome_channels.json", "w") as file:
+            json.dump(welcome_channels, file)
+
+        embed.add_field(
+            name="🎉 Canal Configurado",
+            value=f"As mensagens de boas-vindas serão enviadas em {channel.mention}.",
+            inline=False
+        )
+        
+        if welcome_message:
+            embed.add_field(
+                name="📝 Mensagem de Boas-Vindas",
+                value=f"A mensagem personalizada é: {welcome_message}",
+                inline=False
+            )
+        else:
+            embed.add_field(
+                name="📝 Mensagem Padrão",
+                value="A mensagem padrão será usada.",
+                inline=False
+            )
+
+        embed.set_footer(text="Você pode mudar o canal ou a mensagem executando este comando novamente.")
+    else:
+        embed.add_field(
+            name="⚙️ Como Configurar",
+            value="Use o comando no seguinte formato:\n`!entre #nome-do-canal` **[mensagem personalizada]**",
+            inline=False
+        )
+        embed.add_field(
+            name="📌 Permissão Necessária",
+            value="Apenas administradores podem configurar o canal de boas-vindas.",
+            inline=False
+        )
+        embed.set_footer(text="Certifique-se de mencionar um canal válido!")
+
+    # Enviar a mensagem com a embed
+    message = await ctx.send(embed=embed)
+
+    # Adicionar uma reação para testar a configuração
+    await message.add_reaction("✅")
+
+    # Função para esperar a reação
+    def check(reaction, user):
+        return (
+            user == ctx.author and 
+            str(reaction.emoji) == "✅" and 
+            reaction.message.id == message.id
+        )
+
+    try:
+        # Esperar pela reação
+        reaction, user = await ctx.bot.wait_for("reaction_add", timeout=60.0, check=check)
+
+        # Simular mensagem de boas-vindas no canal configurado
+        if channel:
+            test_message = welcome_message or f"Bem-vindo(a) ao servidor, {ctx.author.mention}! 🎉"
+            await channel.send(test_message)
+            await ctx.send(f"🎉 Mensagem de teste enviada no canal {channel.mention}!")
+        else:
+            await ctx.send("⚠️ Nenhum canal configurado para enviar a mensagem de teste.")
+    except asyncio.TimeoutError:
+        await ctx.send("⏳ O tempo para testar a configuração expirou. Reaja com ✅ dentro de 60 segundos na próxima tentativa.")
+
+# Evento para enviar mensagem de boas-vindas
+@commands.Cog.listener()
+async def on_member_join(member):
+    guild_id = str(member.guild.id)
+    channel_data = welcome_channels.get(guild_id)
+
+    if channel_data:
+        channel_id = channel_data["channel_id"]
+        welcome_message = channel_data["welcome_message"]
+        channel = member.guild.get_channel(channel_id)
+        if channel:
+            # Substituir o placeholder {user.mention} pela menção do novo membro
+            personalized_message = welcome_message.format(user=member)
+            await channel.send(personalized_message)
+
+#COMANDO PARA LIMPAR CHAT
+@commands.command()
+@commands.has_permissions(administrator=True)
+async def clear(ctx, quantidade: int):
     if quantidade <= 0:
         await ctx.send('Por favor, insira um número para deletar as mensagens.')
         return
