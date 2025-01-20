@@ -11,9 +11,9 @@ import json
 
 translator = Translator()
 
-__all__ = ['ajuda', 'traduzir', 'ppt', 'play', 'stop', 'skip', 'volume', 'leave', 'entre', 'clear'] #__COMANDOS IMPORTADOS__
+__all__ = ['ajuda', 'translate', 'ppt', 'play', 'stop', 'skip', 'volume', 'leave', 'entre', 'clear'] #__COMANDOS IMPORTADOS__
 
-#__COMANDOS BOT__PT-BR
+#__COMANDO DO BYTECODE__
 #COMANDO DE AJUDA
 textos_ajuda = {
     "pt": {
@@ -25,7 +25,7 @@ textos_ajuda = {
         "moderacao": "Comandos de Moderação",
         "footer": "Desenvolvido por @Lucasmassaroto1",
         "comandos": {
-            "traducao": "`!traduzir <idioma> <texto>`: Traduz o texto fornecido para o idioma especificado.",
+            "traducao": "`!translate <idioma> <texto>`: Traduz o texto fornecido para o idioma especificado.",
             "diversao": "`!ppt`: Jogo de Pedra, Papel e Tesoura.",
             "musica": (
                 "`!play <url>`: O DJ toca músicas do YouTube usando o `NOME` ou `LINK`.\n"
@@ -102,7 +102,7 @@ async def ajuda(ctx):
 
 #COMANDO DE TRADUÇÃO
 @commands.command()
-async def traduzir(ctx, lingua: str, *, texto: str):
+async def translate(ctx, lingua: str, *, texto: str):
     try:
         traducao = translator.translate(texto, dest=lingua)
         await ctx.send(f"Aqui está a Tradução para a Lingua ({lingua}): `{traducao.text}`")
