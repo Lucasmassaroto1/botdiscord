@@ -8,10 +8,11 @@ from googletrans import Translator
 import aiohttp
 import re
 import json
+import openai
 
 translator = Translator()
 
-__all__ = ['ajuda', 'translate', 'ppt', 'play', 'stop', 'skip', 'volume', 'leave', 'entre', 'clear'] #__COMANDOS IMPORTADOS__
+__all__ = ['ajuda', 'translate', 'ppt', 'play', 'stop', 'skip', 'volume', 'leave', 'entre', 'clear', 'chat'] #__COMANDOS IMPORTADOS__
 
 #__COMANDO DO BYTECODE__
 #COMANDO DE AJUDA
@@ -26,6 +27,7 @@ textos_ajuda = {
         "footer": "Desenvolvido por @Lucasmassaroto1",
         "comandos": {
             "traducao": "`!translate <idioma> <texto>`: Traduz o texto fornecido para o idioma especificado.",
+            "ai": "`!chat` <text>: Permite conversar com o Chat Gpt.",
             "diversao": "`!ppt`: Jogo de Pedra, Papel e Tesoura.",
             "musica": (
                 "`!play <url>`: O DJ toca músicas do YouTube usando o `NOME` ou `LINK`.\n"
@@ -45,11 +47,13 @@ textos_ajuda = {
         "descricao": "Here is the list of commands available in the ByteCode:",
         "diversao": "Fun Commands",
         "traducao": "Translation Command",
+        "ai": "Chat Gpt",
         "musica": "Music Commands",
         "moderacao": "Moderation Commands",
         "footer": "Developed by @Lucasmassaroto1",
         "comandos": {
             "traducao": "`!translate <language> <text>`: Translates the given text to the specified language.",
+            "ai": "`!chat` <text>: Allows you to chat with Gpt Chat",
             "diversao": "`!ppt`: Rock, Paper, Scissors game.",
             "musica": (
                 "`!play <url>`: The DJ plays songs from YouTube using `NAME` or `LINK`.\n"
@@ -90,6 +94,7 @@ async def ajuda(ctx):
             color=discord.Color.green()
         )
         embed.add_field(name=texto["traducao"], value=texto["comandos"]["traducao"], inline=False)
+        embed.add_field(name=texto["ai"], value=texto["comandos"]["ai"], inline=False)
         embed.add_field(name=texto["diversao"], value=texto["comandos"]["diversao"], inline=False)
         embed.add_field(name=texto["musica"], value=texto["comandos"]["musica"], inline=False)
         embed.add_field(name=texto["moderacao"], value=texto["comandos"]["moderacao"], inline=False)
@@ -462,3 +467,26 @@ async def clear(ctx, quantidade: int):
         return
     deleted = await ctx.channel.purge(limit=quantidade)
     await ctx.send(f"Apaguei {len(deleted)} mensagens.", delete_after=5)
+
+#COMANDO DO CHAT GPT
+@commands.command()
+async def chat(ctx, *, prompt: str):
+    """
+    Comando para conversar com o ChatGPT. O usuário envia uma mensagem e o ChatGPT responde.
+    """
+    try:
+        # Fazer a solicitação para o OpenAI
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",  # Use "gpt-4" se sua conta tiver suporte
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=200,  # Limite de resposta
+            temperature=0.7   # Criatividade da resposta
+        )
+
+        # Extrair a resposta
+        chat_response = response['choices'][0]['message']['content']
+        await ctx.send(f"🤖 **ChatGPT:** {chat_response}")
+
+    except Exception as e:
+        await ctx.send("❌ Ocorreu um erro ao tentar processar sua solicitação.")
+        print(f"Erro no ChatGPT: {e}")
