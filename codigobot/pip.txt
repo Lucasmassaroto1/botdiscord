@@ -8,4 +8,5 @@ pip install youtube-dl
 pip install urllib3
 pip install googletrans
 pip install googletrans==4.0.0-rc1
+pip install openai
 pip install ffmpeg "opicional"
