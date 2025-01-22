@@ -1,8 +1,10 @@
 import discord
 from discord.ext import commands
+import config #IMPORTA KEY DO BOT E DA API
 from comandos import * # IMPORTA TODOS OS COMANDOS DO ARQUIVO DE COMANDOS
 
 # CONFIGURAÇÃO DO BOT
+token = config.token
 intents = discord.Intents.default()
 intents.message_content = True
 client = commands.Bot(command_prefix='!', intents=intents) # PREFIXO DE ATIVAÇÃO DO BOT
@@ -15,6 +17,8 @@ async def on_ready():
 client.add_command(ajuda) #__COMANDO PARA MOSTRAR A LISTA DE COMANDOS DIVIDIDOS POR CATEGORIAS__
 #__COMUNICAÇÃO ENTRE USUARIOS__
 client.add_command(translate) #__COMANDO PARA FACILITAR A COMUNICAÇÃO ENTRE OS USUARIOS__
+#__COMUNICAÇÃO COM O CHAT GPT__
+client.add_command(chat) #__COMANDO DO CHAT GPT__
 #__COMANDOS DE DIVERSÃO__
 client.add_command(ppt) #__COMANDO PARA JOGAR PEDRA, PAPEL OU TESOURA COM O BOT__
 #__COMANDOS DE MÚSICA__
@@ -27,6 +31,5 @@ client.add_command(leave) #__COMANDO PARA TIRAR O DJ DA FESTA__
 client.add_command(entre) #__COMANDO PARA ENVIAR MENSAGENS DE BEM-VINDOS AOS USUARIO__
 client.add_command(clear) #__COMANDO PARA LIMPEZA DE CHAT__
 
-with open('C:/Users/User Name/Projetos/codigobot/token.txt', 'r') as file: #MUDE O CAMINHO "C:/Users/User Name/Projetos/codigobot/token.txt" PARA O LOCAL DE SUA PREFERENCIA
-    token = file.readlines()[0]
+#PARA INICIAR O BOT
 client.run(token)
