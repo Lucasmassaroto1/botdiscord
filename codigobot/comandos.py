@@ -21,13 +21,14 @@ textos_ajuda = {
         "titulo": "Menu de Ajuda",
         "descricao": "Aqui está a lista de comandos disponíveis no ByteCode:",
         "diversao": "Comandos de Diversão",
+        "ai": "Chat Gpt",
         "traducao": "Comando de tradução",
         "musica": "Comandos de Música",
         "moderacao": "Comandos de Moderação",
         "footer": "Desenvolvido por @Lucasmassaroto1",
         "comandos": {
             "traducao": "`!translate <idioma> <texto>`: Traduz o texto fornecido para o idioma especificado.",
-            "ai": "`!chat` <text>: Permite conversar com o Chat Gpt.",
+            "ai": "`!chat <text>`: Permite conversar com o Chat Gpt.",
             "diversao": "`!ppt`: Jogo de Pedra, Papel e Tesoura.",
             "musica": (
                 "`!play <url>`: O DJ toca músicas do YouTube usando o `NOME` ou `LINK`.\n"
@@ -53,7 +54,7 @@ textos_ajuda = {
         "footer": "Developed by @Lucasmassaroto1",
         "comandos": {
             "traducao": "`!translate <language> <text>`: Translates the given text to the specified language.",
-            "ai": "`!chat` <text>: Allows you to chat with Gpt Chat",
+            "ai": "`!chat <text>`: Allows you to chat with Gpt Chat",
             "diversao": "`!ppt`: Rock, Paper, Scissors game.",
             "musica": (
                 "`!play <url>`: The DJ plays songs from YouTube using `NAME` or `LINK`.\n"
