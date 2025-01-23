@@ -12,7 +12,7 @@ import openai
 
 translator = Translator()
 
-__all__ = ['ajuda', 'translate', 'ppt', 'play', 'stop', 'skip', 'volume', 'leave', 'entre', 'clear', 'chat'] #__COMANDOS IMPORTADOS__
+__all__ = ['ajuda', 'translate', 'ppt', 'play', 'stop', 'skip', 'volume', 'leave', 'clear', 'chat'] #__COMANDOS IMPORTADOS__
 
 #__COMANDO DO BYTECODE__
 #COMANDO DE AJUDA
@@ -39,7 +39,7 @@ textos_ajuda = {
             ),
             "moderacao": (
                 "`!clear <quantidade>`: Apaga mensagens no canal.\n"
-                "`!entre <canal>`: Configura o canal de boas-vindas."
+                "`!setwelcome <canal> <texto>`: Configura o canal de boas-vindas."
             )
         }
     },
@@ -65,7 +65,7 @@ textos_ajuda = {
             ),
             "moderacao": (
                 "`!clear <amount>`: Deletes a specified number of messages in the channel.\n"
-                "`!entre <channel>`: Sets the welcome channel."
+                "`!setwelcome <channel> <text>`: Sets the welcome channel."
             ),
         }
     }
@@ -351,114 +351,6 @@ async def leave(ctx):
     await ctx.send("Desconectado do canal de voz.")
 
 #COMANDOS DE MODERAÇÃO
-#COMANDO DE WELCOME
-# Dicionário para armazenar canais de boas-vindas
-welcome_channels = {}
-
-# Carregar canais salvos de um arquivo JSON
-try:
-    with open("welcome_channels.json", "r") as file:
-        welcome_channels = json.load(file)
-except FileNotFoundError:
-    welcome_channels = {}
-
-# Comando para configurar o canal de boas-vindas
-@commands.command()
-@commands.has_permissions(administrator=True)
-async def entre(ctx, channel: discord.TextChannel = None, *, welcome_message: str = None):
-    embed = discord.Embed(
-        title="Configuração de Canal de Boas-Vindas",
-        description="Use este comando para configurar o canal onde as mensagens de boas-vindas serão enviadas.",
-        color=discord.Color.green()
-    )
-    
-    if channel:
-        guild_id = str(ctx.guild.id)
-        welcome_channels[guild_id] = {
-            "channel_id": channel.id,
-            "welcome_message": welcome_message or "Bem-vindo(a) ao servidor, {user.mention}! 🎉"
-        }
-
-        # Salvar no arquivo JSON
-        with open("welcome_channels.json", "w") as file:
-            json.dump(welcome_channels, file)
-
-        embed.add_field(
-            name="🎉 Canal Configurado",
-            value=f"As mensagens de boas-vindas serão enviadas em {channel.mention}.",
-            inline=False
-        )
-        
-        if welcome_message:
-            embed.add_field(
-                name="📝 Mensagem de Boas-Vindas",
-                value=f"A mensagem personalizada é: {welcome_message}",
-                inline=False
-            )
-        else:
-            embed.add_field(
-                name="📝 Mensagem Padrão",
-                value="A mensagem padrão será usada.",
-                inline=False
-            )
-
-        embed.set_footer(text="Você pode mudar o canal ou a mensagem executando este comando novamente.")
-    else:
-        embed.add_field(
-            name="⚙️ Como Configurar",
-            value="Use o comando no seguinte formato:\n`!entre #nome-do-canal` **[mensagem personalizada]**",
-            inline=False
-        )
-        embed.add_field(
-            name="📌 Permissão Necessária",
-            value="Apenas administradores podem configurar o canal de boas-vindas.",
-            inline=False
-        )
-        embed.set_footer(text="Certifique-se de mencionar um canal válido!")
-
-    # Enviar a mensagem com a embed
-    message = await ctx.send(embed=embed)
-
-    # Adicionar uma reação para testar a configuração
-    await message.add_reaction("✅")
-
-    # Função para esperar a reação
-    def check(reaction, user):
-        return (
-            user == ctx.author and 
-            str(reaction.emoji) == "✅" and 
-            reaction.message.id == message.id
-        )
-
-    try:
-        # Esperar pela reação
-        reaction, user = await ctx.bot.wait_for("reaction_add", timeout=60.0, check=check)
-
-        # Simular mensagem de boas-vindas no canal configurado
-        if channel:
-            test_message = welcome_message or f"Bem-vindo(a) ao servidor, {ctx.author.mention}! 🎉"
-            await channel.send(test_message)
-            await ctx.send(f"🎉 Mensagem de teste enviada no canal {channel.mention}!")
-        else:
-            await ctx.send("⚠️ Nenhum canal configurado para enviar a mensagem de teste.")
-    except asyncio.TimeoutError:
-        await ctx.send("⏳ O tempo para testar a configuração expirou. Reaja com ✅ dentro de 60 segundos na próxima tentativa.")
-
-# Evento para enviar mensagem de boas-vindas
-@commands.Cog.listener()
-async def on_member_join(member):
-    guild_id = str(member.guild.id)
-    channel_data = welcome_channels.get(guild_id)
-
-    if channel_data:
-        channel_id = channel_data["channel_id"]
-        welcome_message = channel_data["welcome_message"]
-        channel = member.guild.get_channel(channel_id)
-        if channel:
-            # Substituir o placeholder {user.mention} pela menção do novo membro
-            personalized_message = welcome_message.format(user=member)
-            await channel.send(personalized_message)
-
 #COMANDO PARA LIMPAR CHAT
 @commands.command()
 @commands.has_permissions(administrator=True)
