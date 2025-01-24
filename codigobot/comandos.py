@@ -7,7 +7,6 @@ import random
 from googletrans import Translator
 import aiohttp
 import re
-import json
 
 translator = Translator()
 

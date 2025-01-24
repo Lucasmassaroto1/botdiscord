@@ -1,11 +1,9 @@
 import discord
 from discord.ext import commands
-import config #IMPORTA KEY DO BOT E DA API
 from comandos import * # IMPORTA TODOS OS COMANDOS DO ARQUIVO DE COMANDOS
 import json
 
 # CONFIGURAÇÃO DO BOT
-token = config.token
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
@@ -66,5 +64,7 @@ client.add_command(leave) #__COMANDO PARA TIRAR O DJ DA FESTA__
 #__COMANDO DE MODERAÇÃO__
 client.add_command(clear) #__COMANDO PARA LIMPEZA DE CHAT__
 
-#PARA INICIAR O BOT
-client.run(token)
+with open('C:/Users/User Name/Projetos/codigobot/token.txt', 'r') as file:
+    token = file.readlines()[0]  #__TOKEN DO BOT DISCORD__
+
+client.run(token) #__INICIA O BOT__
