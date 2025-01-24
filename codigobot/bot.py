@@ -55,8 +55,6 @@ async def on_member_join(member):
 client.add_command(ajuda) #__COMANDO PARA MOSTRAR A LISTA DE COMANDOS DIVIDIDOS POR CATEGORIAS__
 #__COMUNICAÇÃO ENTRE USUARIOS__
 client.add_command(translate) #__COMANDO PARA FACILITAR A COMUNICAÇÃO ENTRE OS USUARIOS__
-#__COMUNICAÇÃO COM O CHAT GPT__
-client.add_command(chat) #__COMANDO DO CHAT GPT__
 #__COMANDOS DE DIVERSÃO__
 client.add_command(ppt) #__COMANDO PARA JOGAR PEDRA, PAPEL OU TESOURA COM O BOT__
 #__COMANDOS DE MÚSICA__
