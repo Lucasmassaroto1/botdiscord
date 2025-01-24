@@ -13,7 +13,7 @@ client = commands.Bot(command_prefix='!', intents=intents) # PREFIXO DE ATIVAÇ�
 
 @client.event
 async def on_ready():
-    print('Bot "NOME DO BOT" está pronto para uso!') # TIRAR ASPAS DUPLAS ANTES DE RODAR O CODIGO
+    print(' "NOME DO BOT" está pronto para uso!') # COLOCAR O NOME DO SEU BOT ANTES DE RODAR O CODIGO
 
 #COMANDO DE BOAS VINDAS
 # Dicionário para armazenar canais e mensagens de boas-vindas
