@@ -27,6 +27,7 @@ except FileNotFoundError:
 
 # Comando para configurar o canal e a mensagem de boas-vindas
 @client.command(name="setwelcome")
+@commands.has_permissions(administrator=True)
 async def set_welcome(ctx, channel: discord.TextChannel, *, message):
     guild_id = str(ctx.guild.id)
     welcome_settings[guild_id] = {"channel_id": channel.id, "message": message}
