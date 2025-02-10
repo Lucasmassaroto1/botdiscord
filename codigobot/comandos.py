@@ -112,27 +112,41 @@ async def translate(ctx, lingua: str, *, texto: str):
 #COMANDO PARA DIVERSÃO
 #COMANDO DE PPT
 @commands.command()
-async def ppt(ctx, escolha: str):
-    escolhas = ["pedra", "papel", "tesoura"]
-    escolha_usuario = escolha.lower()
-
-    if escolha_usuario not in escolhas:
-        await ctx.send("Escolha inválida! Por favor, escolha entre `pedra`, `papel` ou `tesoura`.")
-        return
-
-    escolha_bot = random.choice(escolhas)
-
-    # Determinar o vencedor
-    if escolha_usuario == escolha_bot:
-        resultado = "Empate! 🤝"
-    elif (escolha_usuario == "pedra" and escolha_bot == "tesoura") or \
-        (escolha_usuario == "papel" and escolha_bot == "pedra") or \
-        (escolha_usuario == "tesoura" and escolha_bot == "papel"):
-        resultado = "Você venceu! 🎉"
-    else:
-        resultado = "Você perdeu! 😢"
-
-    await ctx.send(f"Você escolheu: {escolha_usuario}\n Eu escolhi: {escolha_bot}\n{resultado}")
+async def ppt(ctx: commands.Context):
+    opcoes = {
+        'Pedra': '🪨',
+        'Papel': '📄',
+        'Tesoura': '✂️'
+    }
+    escolhas = list(opcoes.keys())
+    
+    async def select_resposta(interaction: discord.Interaction):
+        escolha_usuario = interaction.data['values'][0]
+        escolha_bot = random.choice(escolhas)
+        
+        resultado = ""
+        if escolha_usuario == escolha_bot:
+            resultado = "Empate!"
+        elif (escolha_usuario == 'Pedra' and escolha_bot == 'Tesoura') or \
+             (escolha_usuario == 'Papel' and escolha_bot == 'Pedra') or \
+             (escolha_usuario == 'Tesoura' and escolha_bot == 'Papel'):
+            resultado = "Você venceu! 🎉"
+        else:
+            resultado = "O bot venceu! 😈"
+        
+        await interaction.response.send_message(
+            f'Você escolheu {opcoes[escolha_usuario]} | O bot escolheu {opcoes[escolha_bot]}\n**{resultado}**'
+        )
+    
+    menuSelecao = discord.ui.Select(placeholder='Escolha sua jogada')
+    for opcao in escolhas:
+        menuSelecao.append_option(discord.SelectOption(label=opcao, value=opcao))
+    
+    menuSelecao.callback = select_resposta
+    view = discord.ui.View()
+    view.add_item(menuSelecao)
+    
+    await ctx.send("Jogo de Pedra, Papel e Tesoura! Faça sua escolha:", view=view)
 
 #COMANDO DE MÚSICA
 music_queue = [] #__Lista para armazenar as músicas na fila__
