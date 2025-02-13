@@ -12,8 +12,24 @@ client = commands.Bot(command_prefix='!', intents=intents) # PREFIXO DE ATIVAÇ�
 
 @client.event
 async def on_ready():
+    await client.change_presence(status=discord.Status.idle, activity=discord.Game(name"/ajuda")) #__O IDLE MUDA O STATUS DO BOT PARA AUSENTE JÁ O "NAME=/ajuda" ADICIONA O STATUS DE JOGANDO__
+    #await client.tree.sync() #__NÃO É RECOMENDADO DEIXAR ESSE CODIGO DIRETO NO ON_READY POIS PODE CALSAR BUGS NO PROJETO__
+    await load_commands()
     print(' "NOME DO BOT" está pronto para uso!') # COLOCAR O NOME DO SEU BOT ANTES DE RODAR O CODIGO
 
+async def load_commands():
+    from commands import slash
+    await slash.setup(client)
+
+#__SINC SLASH COMMANDS__
+@commands.command()
+@commands.has_permissions(administrador=True)
+async def sinc(ctx: commands.Context):
+    sincs = await ctx.bot.tree.sync() #__COMANDO QUE SINCRINIZA OS SLASH COMANDS__
+    await ctx.reply(f'Comandos sincronizados: {len(sincs)}')
+    print(f'Comandos sincronizados: {len(sincs)}')
+
+client.add_command(sinc)
 #COMANDO DE BOAS VINDAS
 # Dicionário para armazenar canais e mensagens de boas-vindas
 welcome_settings = {}
@@ -101,7 +117,6 @@ async def on_member_join(member):
                 await channel.send(embed=meu_embed)
             
 #__COMANDOS BOT__
-client.add_command(ajuda) #__COMANDO PARA MOSTRAR A LISTA DE COMANDOS DIVIDIDOS POR CATEGORIAS__
 #__COMUNICAÇÃO ENTRE USUARIOS__
 client.add_command(translate) #__COMANDO PARA FACILITAR A COMUNICAÇÃO ENTRE OS USUARIOS__
 #__COMANDOS DE DIVERSÃO__
