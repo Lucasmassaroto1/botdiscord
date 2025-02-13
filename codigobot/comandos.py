@@ -5,100 +5,14 @@ from discord import FFmpegPCMAudio, PCMVolumeTransformer
 import yt_dlp
 import random
 from googletrans import Translator
-import aiohttp
-import re
+#import aiohttp
+#import re
 
 translator = Translator()
 
-__all__ = ['ajuda', 'translate', 'ppt', 'play', 'stop', 'skip', 'volume', 'leave', 'clear'] #__COMANDOS IMPORTADOS__
+__all__ = ['translate', 'ppt', 'play', 'stop', 'skip', 'volume', 'leave', 'clear'] #__COMANDOS IMPORTADOS__
 
 #__COMANDO DO BYTECODE__
-#COMANDO DE AJUDA
-textos_ajuda = {
-    "pt": {
-        "titulo": "Menu de Ajuda",
-        "descricao": "Aqui está a lista de comandos disponíveis no ByteCode:",
-        "diversao": "Comandos de Diversão",
-        "traducao": "Comando de tradução",
-        "musica": "Comandos de Música",
-        "moderacao": "Comandos de Moderação",
-        "footer": "Desenvolvido por @Lucasmassaroto1",
-        "comandos": {
-            "traducao": "`!translate <idioma> <texto>`: Traduz o texto fornecido para o idioma especificado.",
-            "diversao": "`!ppt`: Jogo de Pedra, Papel e Tesoura.",
-            "musica": (
-                "`!play <url>`: O DJ toca músicas do YouTube usando o `NOME` ou `LINK`.\n"
-                "`!stop`: O DJ para a música atual.\n"
-                "`!skip`: O DJ pula a música atual.\n"
-                "`!volume`: Permite mudar o volume usando reações.\n"
-                "`!leave`: Desconecta o DJ da festa."
-            ),
-            "moderacao": (
-                "`!clear <quantidade>`: Apaga mensagens no canal.\n"
-                "`!setwelcome <canal> <texto>`: Configura o canal de boas-vindas."
-            )
-        }
-    },
-    "en": {
-        "titulo": "Help Menu",
-        "descricao": "Here is the list of commands available in the ByteCode:",
-        "diversao": "Fun Commands",
-        "traducao": "Translation Command",
-        "musica": "Music Commands",
-        "moderacao": "Moderation Commands",
-        "footer": "Developed by @Lucasmassaroto1",
-        "comandos": {
-            "traducao": "`!translate <language> <text>`: Translates the given text to the specified language.",
-            "diversao": "`!ppt`: Rock, Paper, Scissors game.",
-            "musica": (
-                "`!play <url>`: The DJ plays songs from YouTube using `NAME` or `LINK`.\n"
-                "`!stop`: The DJ stops the current song.\n"
-                "`!skip`: The DJ skips the current song.\n"
-                "`!volume`: Allows volume adjustment using reactions.\n"
-                "`!leave`: Disconnects the DJ from the party."
-            ),
-            "moderacao": (
-                "`!clear <amount>`: Deletes a specified number of messages in the channel.\n"
-                "`!setwelcome <channel> <text>`: Sets the welcome channel."
-            ),
-        }
-    }
-}
-
-@commands.command()
-async def ajuda(ctx):
-    # Envia mensagem inicial
-    msg = await ctx.send("Selecione o idioma para o menu de ajuda:\n🇧🇷 - Português\n🇺🇸 - English")
-
-    # Adiciona reações para seleção de idioma
-    await msg.add_reaction("🇧🇷")
-    await msg.add_reaction("🇺🇸")
-
-    def check(reaction, user):
-        return user == ctx.author and str(reaction.emoji) in ["🇧🇷", "🇺🇸"]
-
-    try:
-        reaction, user = await ctx.bot.wait_for("reaction_add", timeout=30.0, check=check)
-        idioma = "pt" if str(reaction.emoji) == "🇧🇷" else "en"
-
-        # Gera o embed no idioma escolhido
-        texto = textos_ajuda[idioma]
-        embed = discord.Embed(
-            title=texto["titulo"],
-            description=texto["descricao"],
-            color=discord.Color.green()
-        )
-        embed.add_field(name=texto["traducao"], value=texto["comandos"]["traducao"], inline=False)
-        embed.add_field(name=texto["diversao"], value=texto["comandos"]["diversao"], inline=False)
-        embed.add_field(name=texto["musica"], value=texto["comandos"]["musica"], inline=False)
-        embed.add_field(name=texto["moderacao"], value=texto["comandos"]["moderacao"], inline=False)
-        embed.set_footer(text=texto["footer"])
-
-        await ctx.send(embed=embed)
-
-    except TimeoutError:
-        await ctx.send("Você não selecionou um idioma a tempo. Tente novamente.")
-
 #COMANDO DE TRADUÇÃO
 @commands.command()
 async def translate(ctx, lingua: str, *, texto: str):
