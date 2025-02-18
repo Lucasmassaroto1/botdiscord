@@ -66,9 +66,8 @@ async def setup(client: discord.Client):
             }
         }
     }
-    #__FUNÇÂO PARA GERAR O EMBED COM BASE NO IDIOMA__
     def gerar_embed(linguagem):
-        ajuda_texto = textos_ajuda.get(linguagem, textos_ajuda['pt'])  #__FALLBACK PARA PORTUGUÊS__
+        ajuda_texto = textos_ajuda.get(linguagem, textos_ajuda['pt'])
         embed = discord.Embed(
             title=ajuda_texto["titulo"],
             description=ajuda_texto["descricao"],
@@ -81,15 +80,11 @@ async def setup(client: discord.Client):
         embed.set_footer(text=ajuda_texto["footer"])
 
         return embed
-    #__COMANDO PARA EXIBIR A AJUDA COM BASE NO IDIOMA__
     @client.tree.command(description="Exibe a lista de comandos disponíveis no ByteCode.")
     @app_commands.describe(idioma="Escolha o idioma (pt/en)")
     async def ajuda(interaction: discord.Interaction, idioma: str = "pt"):
-        #__VERIFICA SE O IDIOMA É VALIDO, SE NÃO FOR, SETA COMO 'PT' POR PADRÃO__
         idioma = idioma if idioma in ["pt", "en"] else "pt"
 
-        #__GERAR O EMBED COM O IDIOMA SELECIONADO__
         embed = gerar_embed(idioma)
 
-        #__ENVIARA MENSAGEM COM O EMBED GERADO__
         await interaction.response.send_message(embed=embed)
