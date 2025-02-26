@@ -1,7 +1,7 @@
-# BOT DO DISCORD
+# Codigo Do ByteCode
 Óla, seja bem-vindo(a)!
 
-Estou disponibilizando o código do meu bot do Discord para que qualquer pessoa possa utilizá-lo como base. Antes de começarmos, é importante garantir que você tenha todas as ferramentas necessárias, como descrito logo abaixo.
+Estou disponibilizando o código do ByteCode para que qualquer pessoa possa utilizá-lo como base. Antes de começarmos, é importante garantir que você tenha todas as ferramentas necessárias, como descrito logo abaixo.
 
 <h2>Ferramentas Necessárias.</h2>
 <li><b>Python</b> (versão 3.12+): <a href="https://www.python.org/downloads/">Baixar Python</a></li>
@@ -14,4 +14,4 @@ Estou disponibilizando o código do meu bot do Discord para que qualquer pessoa 
 
 
 
-Bot do Discord criado por <a href="https://www.tiktok.com/@lucasmassaroto1">@lucasmassaroto1</a>.
+criado por <a href="https://www.tiktok.com/@lucasmassaroto1">@lucasmassaroto1</a>.
