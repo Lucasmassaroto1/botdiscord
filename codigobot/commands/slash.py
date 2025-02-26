@@ -26,18 +26,18 @@ async def setup(client: discord.Client):
             "moderacao": "Comandos de Moderação",
             "footer": "Desenvolvido por @Lucasmassaroto1",
             "comandos": {
-                "traducao": "`/translate <idioma> <texto>`: Traduz o texto para o idioma escolhido.",
-                "diversao": "`/ppt`: Jogo de Pedra, Papel e Tesoura.",
+                "traducao": "`!translate <idioma> <texto>`: Traduz o texto para o idioma escolhido.",
+                "diversao": "`!ppt`: Jogo de Pedra, Papel e Tesoura.",
                 "musica": (
-                    "`/play <url>`: O DJ toca músicas do YouTube.\n"
-                    "`/stop`: O DJ para a música atual.\n"
-                    "`/skip`: O DJ pula a música atual.\n"
-                    "`/volume`: Ajusta o volume.\n"
-                    "`/leave`: Desconecta o DJ."
+                    "`!play <url>`: O DJ toca músicas do YouTube.\n"
+                    "`!stop`: O DJ para a música atual.\n"
+                    "`!skip`: O DJ pula a música atual.\n"
+                    "`!volume`: Ajusta o volume.\n"
+                    "`!leave`: Desconecta o DJ."
                 ),
                 "moderacao": (
-                    "`/clear <quantidade>`: Apaga mensagens no canal.\n"
-                    "`/setwelcome <canal> <texto> <imagem>`: Configura o canal de boas-vindas."
+                    "`!clear <quantidade>`: Apaga mensagens no canal.\n"
+                    "`!setwelcome <canal> <texto> <imagem>`: Configura o canal de boas-vindas."
                 )
             }
         },
@@ -50,18 +50,18 @@ async def setup(client: discord.Client):
             "moderacao": "Moderation Commands",
             "footer": "Developed by @Lucasmassaroto1",
             "comandos": {
-                "traducao": "`/translate <language> <text>`: Translates the given text.",
-                "diversao": "`/ppt`: Rock, Paper, Scissors game.",
+                "traducao": "`!translate <language> <text>`: Translates the given text.",
+                "diversao": "`!ppt`: Rock, Paper, Scissors game.",
                 "musica": (
-                    "`/play <url>`: The DJ plays songs from YouTube.\n"
-                    "`/stop`: The DJ stops the current song.\n"
-                    "`/skip`: The DJ skips the current song.\n"
-                    "`/volume`: Adjusts the volume.\n"
-                    "`/leave`: Disconnects the DJ."
+                    "`!play <url>`: The DJ plays songs from YouTube.\n"
+                    "`!stop`: The DJ stops the current song.\n"
+                    "`!skip`: The DJ skips the current song.\n"
+                    "`!volume`: Adjusts the volume.\n"
+                    "`!leave`: Disconnects the DJ."
                 ),
                 "moderacao": (
-                    "`/clear <amount>`: Deletes messages in the channel.\n"
-                    "`/setwelcome <channel> <text> <image>`: Sets the welcome channel."
+                    "`!clear <amount>`: Deletes messages in the channel.\n"
+                    "`!setwelcome <channel> <text> <image>`: Sets the welcome channel."
                 )
             }
         }
