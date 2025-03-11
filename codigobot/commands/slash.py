@@ -2,9 +2,19 @@ import discord
 from discord import app_commands
 
 async def setup(client: discord.Client):
-    @client.tree.command(description='Responde o Usuario comfirmando o teste')
-    async def teste(interaction: discord.Interaction):
-        await interaction.response.send_message(f'Olá, {interaction.user.mention}! Teste feito com sucesso!', ephemeral=True)
+    @client.tree.command(description='Eu responto com um texto sobre mim')
+    async def sobre(interaction: discord.Interaction):
+        await interaction.response.send_message('Olá, eu sou o ByteCode, um bot CLT criado para ajudar e entreter os usuários. Posso tocar musicas, traduzindo textos, oferecer jogos e muito mais. Fui desenvolvido por @lucasmassaroto1.', ephemeral=True)
+
+    @client.tree.command(description='Gera um link para adicionar o ByteCode ao seu server.')
+    async def invite(interaction: discord.Interaction):
+        invite_url = f"https://discord.com/oauth2/authorize?client_id=1309200248987586560&scope=bot&permissions=1759218604441591&intents=65535"
+        embed = discord.Embed(
+            title="Convite do Bot",
+            description=f"Clique [aqui]({invite_url}) para adicionar o bot ao seu servidor!",
+            color=discord.Color.green()
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @client.tree.command(description='Envia uma mensagem contendo o que o usuário digitou')
     async def falar(interaction: discord.Interaction, frase:str):
@@ -17,27 +27,34 @@ async def setup(client: discord.Client):
         await interaction.response.send_message(f'A soma de {num1} + {num2} é {resultado}')
 
     textos_ajuda = {
-        "pt": {
+        "pt":{
             "titulo": "Menu de Ajuda",
             "descricao": "Aqui está a lista de comandos disponíveis no ByteCode:",
             "diversao": "Comandos de Diversão",
             "traducao": "Comando de Tradução",
             "musica": "Comandos de Música",
             "moderacao": "Comandos de Moderação",
+            "slash": "Slash Commands",
             "footer": "Desenvolvido por @Lucasmassaroto1",
-            "comandos": {
+            "comandos":{
                 "traducao": "`!translate <idioma> <texto>`: Traduz o texto para o idioma escolhido.",
                 "diversao": "`!ppt`: Jogo de Pedra, Papel e Tesoura.",
-                "musica": (
+                "musica":(
                     "`!play <url>`: O DJ toca músicas do YouTube.\n"
                     "`!stop`: O DJ para a música atual.\n"
                     "`!skip`: O DJ pula a música atual.\n"
                     "`!volume`: Ajusta o volume.\n"
                     "`!leave`: Desconecta o DJ."
                 ),
-                "moderacao": (
+                "moderacao":(
                     "`!clear <quantidade>`: Apaga mensagens no canal.\n"
                     "`!setwelcome <canal> <texto> <imagem>`: Configura o canal de boas-vindas."
+                ),
+                "slash":(
+                    "`/invite`: Gera um link para adicionar o ByteCode ao seu server.\n"
+                    "`/sobre`: Envia um texto sobre o ByteCode.\n"
+                    "`/falar`: O ByteCode repete a frase escrita pelo usuario.\n"
+                    "`/somar <numero1> <numero2>`: O ByteCode faz a soma entre 2 numeros."
                 )
             }
         },
@@ -48,6 +65,7 @@ async def setup(client: discord.Client):
             "traducao": "Translation Command",
             "musica": "Music Commands",
             "moderacao": "Moderation Commands",
+            "slash": "Slash Commands",
             "footer": "Developed by @Lucasmassaroto1",
             "comandos": {
                 "traducao": "`!translate <language> <text>`: Translates the given text.",
@@ -62,29 +80,61 @@ async def setup(client: discord.Client):
                 "moderacao": (
                     "`!clear <amount>`: Deletes messages in the channel.\n"
                     "`!setwelcome <channel> <text> <image>`: Sets the welcome channel."
+                ),
+                "slash":(
+                    "`/invite`: Generates a link to add the ByteCode to your server.\n"
+                    "`/sobre`: Send a text about the ByteCode.\n"
+                    "`/falar`: The ByteCode repeats the sentence written by the user.\n"
+                    "`/somar <Number1> <Number2>`: ByteCode adds 2 numbers together."
                 )
             }
         }
     }
-    def gerar_embed(linguagem):
+    def gerar_embed(linguagem, pagina):
         ajuda_texto = textos_ajuda.get(linguagem, textos_ajuda['pt'])
         embed = discord.Embed(
             title=ajuda_texto["titulo"],
             description=ajuda_texto["descricao"],
             color=discord.Color.green()
         )
+        if pagina == 1:
+            embed.add_field(name=f"🎮 {ajuda_texto['diversao']}", value=ajuda_texto['comandos']['diversao'], inline=False)
+            embed.add_field(name=f"🎵 {ajuda_texto['musica']}", value=ajuda_texto['comandos']['musica'], inline=False)
+        elif pagina == 2:
+            embed.add_field(name=f"🌐 {ajuda_texto['traducao']}", value=ajuda_texto['comandos']['traducao'], inline=False)
+            embed.add_field(name=f"⚙ {ajuda_texto['slash']}", value=ajuda_texto['comandos']['slash'], inline=False)
+            embed.add_field(name=f"🛠️ {ajuda_texto['moderacao']}", value=ajuda_texto['comandos']['moderacao'], inline=False)
 
-        embed.add_field(name=f"🎮 {ajuda_texto['diversao']}", value=ajuda_texto['comandos']['diversao'], inline=False)
-        embed.add_field(name=f"🎵 {ajuda_texto['musica']}", value=ajuda_texto['comandos']['musica'], inline=False)
-        embed.add_field(name=f"🛠️ {ajuda_texto['moderacao']}", value=ajuda_texto['comandos']['moderacao'], inline=False)
         embed.set_footer(text=ajuda_texto["footer"])
-
         return embed
+    class AjudaView(discord.ui.View):
+        def __init__(self, linguagem):
+            super().__init__()
+            self.linguagem = linguagem
+            self.pagina = 1
+
+        @discord.ui.button(label="◀️", style=discord.ButtonStyle.secondary, disabled=True)
+        async def voltar(self, interaction: discord.Interaction, button: discord.ui.Button):
+            self.pagina = 1
+            button.disabled = True
+            for item in self.children:
+                if isinstance(item, discord.ui.Button) and item.label == "▶️":
+                    item.disabled = False
+            await interaction.response.edit_message(embed=gerar_embed(self.linguagem, self.pagina), view=self)
+
+        @discord.ui.button(label="▶️", style=discord.ButtonStyle.secondary)
+        async def avancar(self, interaction: discord.Interaction, button: discord.ui.Button):
+            self.pagina = 2
+            button.disabled = True
+            for item in self.children:
+                if isinstance(item, discord.ui.Button) and item.label == "◀️":
+                    item.disabled = False
+            await interaction.response.edit_message(embed=gerar_embed(self.linguagem, self.pagina), view=self)
+
     @client.tree.command(description="Exibe a lista de comandos disponíveis no ByteCode.")
     @app_commands.describe(idioma="Escolha o idioma (pt/en)")
     async def ajuda(interaction: discord.Interaction, idioma: str = "pt"):
         idioma = idioma if idioma in ["pt", "en"] else "pt"
-
-        embed = gerar_embed(idioma)
-
-        await interaction.response.send_message(embed=embed)
+        view = AjudaView(idioma)
+        embed = gerar_embed(idioma, 1)
+        await interaction.response.send_message(embed=embed, view=view)
