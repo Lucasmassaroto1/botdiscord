@@ -1,11 +1,9 @@
-RECOMENDO FAZER AS INSTALAÇÕES NOS DOIS ARQUIVOS PARA QUE FUNCIONE CORRETAMENTE.
-
-pip install discord.py
-pip install discord[voice]
-pip install discord-components
-pip install PyNaCl
-pip install youtube-dl
-pip install urllib3
-pip install googletrans
-pip install googletrans==4.0.0-rc1
-pip install ffmpeg "opicional"
+discord.py
+discord[voice]
+discord-components
+PyNaCl
+youtube-dl
+urllib3
+googletrans
+googletrans==4.0.0-rc1
+ffmpeg
