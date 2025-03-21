@@ -32,10 +32,10 @@ Antes de começar, certifique-se de ter as seguintes ferramentas:
     ```
 2. **Instale as dependências**:
 
-   Com o arquivo `pip.txt` na raiz do seu projeto, execute o seguinte comando para instalar todas as dependências:
+   Com o arquivo `requirements.txt` na raiz do seu projeto, execute o seguinte comando para instalar todas as dependências:
 
    ```bash
-   pip install -r pip.txt
+   pip install -r requirements.txt
     ```
 3. **Configure seu token**:
 
