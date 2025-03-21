@@ -5,15 +5,14 @@ from discord import FFmpegPCMAudio, PCMVolumeTransformer
 import yt_dlp
 import random
 from googletrans import Translator
-#import aiohttp
-#import re
+import os
 
 translator = Translator()
 
-__all__ = ['translate', 'ppt', 'play', 'stop', 'skip', 'volume', 'leave', 'clear'] #__COMANDOS IMPORTADOS__
+__all__ = ['translate', 'ppt', 'play', 'stop', 'skip', 'volume', 'leave', 'clear', 'botao', 'menu'] #__COMANDOS IMPORTADOS__
 
 #__COMANDO DO BYTECODE__
-#COMANDO DE TRADUÇÃO
+#__COMANDO DE TRADUÇÃO__
 @commands.command()
 async def translate(ctx, lingua: str, *, texto: str):
     try:
@@ -25,48 +24,67 @@ async def translate(ctx, lingua: str, *, texto: str):
 
 #COMANDO PARA DIVERSÃO
 #COMANDO DE PPT
+class PPTView(discord.ui.View):
+    def __init__(self):
+        super().__init__()
+        self.opcoes = {
+            'Pedra': '🪨',
+            'Papel': '📄',
+            'Tesoura': '✂️'
+        }
+        self.escolhas = list(self.opcoes.keys())
+        self.add_item(PPTView.MenuSelecao(self.opcoes, self.escolhas))
+
+    class MenuSelecao(discord.ui.Select):
+        def __init__(self, opcoes, escolhas):
+            options = [
+                discord.SelectOption(label=opcao, value=opcao, emoji=opcoes[opcao])
+                for opcao in escolhas
+            ]
+            super().__init__(placeholder="Escolha sua jogada", options=options)
+            self.opcoes = opcoes
+            self.escolhas = escolhas
+
+        async def callback(self, interaction: discord.Interaction):
+            await interaction.response.defer()
+
+            escolha_usuario = self.values[0]
+            escolha_bot = random.choice(self.escolhas)
+
+            if escolha_usuario == escolha_bot:
+                resultado = "Empate!"
+            elif (escolha_usuario == 'Pedra' and escolha_bot == 'Tesoura') or \
+                (escolha_usuario == 'Papel' and escolha_bot == 'Pedra') or \
+                (escolha_usuario == 'Tesoura' and escolha_bot == 'Papel'):
+                resultado = "Você venceu! 🎉"
+            else:
+                resultado = "O bot venceu! 😈"
+
+            embed = discord.Embed(title="Resultado: Pedra, Papel, Tesoura!", color=discord.Color.blue())
+            embed.add_field(name="Sua escolha", value=f"{self.opcoes[escolha_usuario]} {escolha_usuario}", inline=True)
+            embed.add_field(name="Escolha do bot", value=f"{self.opcoes[escolha_bot]} {escolha_bot}", inline=True)
+            embed.add_field(name="Resultado", value=f"**{resultado}**", inline=False)
+
+            nova_view = PPTView()
+            await interaction.message.edit(embed=embed, view=nova_view)
+
 @commands.command()
 async def ppt(ctx: commands.Context):
-    opcoes = {
-        'Pedra': '🪨',
-        'Papel': '📄',
-        'Tesoura': '✂️'
-    }
-    escolhas = list(opcoes.keys())
+    embed_inicial = discord.Embed(
+        title="Jogo de Pedra, Papel e Tesoura!",
+        description="Faça sua escolha abaixo:",
+        color=discord.Color.green()
+    )
+    embed_inicial.add_field(name="Escolha", value="Aguarde a seleção de uma jogada.", inline=False)
     
-    async def select_resposta(interaction: discord.Interaction):
-        escolha_usuario = interaction.data['values'][0]
-        escolha_bot = random.choice(escolhas)
-        
-        resultado = ""
-        if escolha_usuario == escolha_bot:
-            resultado = "Empate!"
-        elif (escolha_usuario == 'Pedra' and escolha_bot == 'Tesoura') or \
-             (escolha_usuario == 'Papel' and escolha_bot == 'Pedra') or \
-             (escolha_usuario == 'Tesoura' and escolha_bot == 'Papel'):
-            resultado = "Você venceu! 🎉"
-        else:
-            resultado = "O bot venceu! 😈"
-        
-        await interaction.response.send_message(
-            f'Você escolheu {opcoes[escolha_usuario]} | O bot escolheu {opcoes[escolha_bot]}\n**{resultado}**'
-        )
-    
-    menuSelecao = discord.ui.Select(placeholder='Escolha sua jogada')
-    for opcao in escolhas:
-        menuSelecao.append_option(discord.SelectOption(label=opcao, value=opcao))
-    
-    menuSelecao.callback = select_resposta
-    view = discord.ui.View()
-    view.add_item(menuSelecao)
-    
-    await ctx.send("Jogo de Pedra, Papel e Tesoura! Faça sua escolha:", view=view)
+    view = PPTView()
+    await ctx.send(embed=embed_inicial, view=view)
 
-#COMANDO DE MÚSICA
-music_queue = [] #__Lista para armazenar as músicas na fila__
-music_cache = {} #__Dicionário para armazenar informações das músicas já baixadas__
-current_music = None  #__Variável para rastrear a música atual__
-manual_stop = False #__Variável para rastrear interrupções manuais__
+#__COMANDO DE MÚSICA__
+music_queue = []
+music_cache = {}
+current_music = None
+manual_stop = False
 
 @commands.command()
 async def play(ctx, *, query=None):
@@ -76,16 +94,13 @@ async def play(ctx, *, query=None):
         await ctx.send("Você precisa estar em um canal de voz para usar este comando!")
         return
 
-    # Conectar ao canal de voz
     channel = ctx.author.voice.channel
     if not ctx.voice_client:
         await channel.connect()
     voice_client = ctx.voice_client
 
-    # Resetar o estado de "manual_stop" sempre que uma música for adicionada ou retomada
     manual_stop = False
 
-    # Se o comando for usado sem argumentos, retome a música atual, se existir
     if query is None:
         if current_music and not voice_client.is_playing():
             await ctx.send(f"Retomando a música: **{current_music['title']}**")
@@ -96,31 +111,28 @@ async def play(ctx, *, query=None):
             await ctx.send("Não há nenhuma música para retomar.")
         return
 
-    # Dividir as músicas usando vírgula como separador
     queries = [q.strip() for q in query.split(",")]
     added_songs = []
 
     for query in queries:
-        # Verificar se a música já está no cache
         if query in music_cache:
             music_info = music_cache[query]
             await ctx.send(f"**{music_info['title']}** foi encontrada no cache e adicionada à fila!")
         else:
-            # Processar a música com yt-dlp
+
             with yt_dlp.YoutubeDL({'format': 'bestaudio', 'noplaylist': True}) as ydl:
                 try:
-                    if "http" in query:  # Caso seja uma URL
+                    if "http" in query:
                         info = ydl.extract_info(query, download=False)
-                    else:  # Caso seja um termo de pesquisa
+                    else:
                         search_info = ydl.extract_info(f"ytsearch:{query}", download=False)
-                        info = search_info['entries'][0]  # Selecionar o primeiro resultado
+                        info = search_info['entries'][0]
 
                     music_info = {
                         "title": info['title'],
                         "url": info['url']
                     }
 
-                    # Armazenar no cache
                     music_cache[query] = music_info
                     await ctx.send(f"**{music_info['title']}** foi processada e adicionada à fila!")
                 except Exception as e:
@@ -128,44 +140,39 @@ async def play(ctx, *, query=None):
                     print(f"Erro ao buscar áudio: {e}")
                     continue
 
-        # Verificar se a música já está na fila
         if music_info["title"] in [music['title'] for music in music_queue]:
             await ctx.send(f"A música **{music_info['title']}** já está na fila!")
             continue
 
-        # Adicionar música à fila
         music_queue.append(music_info)
         added_songs.append(music_info["title"])
 
-    # Notificar quais músicas foram adicionadas à fila
     if added_songs:
         await ctx.send(f"As seguintes músicas foram adicionadas à fila: {', '.join(added_songs)}")
 
-    # Reproduzir música se o bot não estiver tocando
     if not voice_client.is_playing():
         await play_next(ctx)
 
 # Função para reproduzir a música
+base_path = os.path.dirname(os.path.abspath(__file__))
+ffmpeg_path = os.path.join(base_path, 'ffmpeg', 'ffmpeg.exe')
 async def play_music(ctx, music_info):
     voice_client = ctx.voice_client
 
-    # Reproduzir áudio
     def after_playing(error):
         if error:
             print(f"Erro ao tocar música: {error}")
-        # Garantir que o bot só chama a próxima música se manual_stop for False
         if not manual_stop:
             asyncio.run_coroutine_threadsafe(play_next(ctx), ctx.bot.loop)
 
     source = PCMVolumeTransformer(
-        FFmpegPCMAudio(music_info["url"], executable="C:/Program Files/ffmpeg/ffmpeg.exe"),
-        volume=0.5  # Volume inicial de 50%
+        FFmpegPCMAudio(music_info["url"], executable=ffmpeg_path),
+        volume=0.5
     )
     voice_client.play(source, after=after_playing)
 
     await ctx.send(f"Tocando agora: **{music_info['title']}**")
 
-# Função para tocar a próxima música na fila
 async def play_next(ctx):
     global music_queue, manual_stop, current_music
 
@@ -174,15 +181,12 @@ async def play_next(ctx):
         current_music = None
         return
 
-    # Verificar se o comando !stop foi usado
     if manual_stop:
         return
 
-    # Pegar a próxima música da fila
     current_music = music_queue.pop(0)
     await play_music(ctx, current_music)
 
-#COMANDO PARA PALSAR A MUSICA
 @commands.command()
 async def stop(ctx):
     global manual_stop
@@ -192,13 +196,12 @@ async def stop(ctx):
         return
 
     if ctx.voice_client.is_playing():
-        manual_stop = True  # Indicar que o stop foi acionado manualmente
-        ctx.voice_client.stop()  # Interromper a reprodução atual
+        manual_stop = True
+        ctx.voice_client.stop()
         await ctx.send("A música foi parada.")
     else:
         await ctx.send("Não há nenhuma música tocando no momento.")
 
-#COMANDO PARA PULAR A MUSICA
 @commands.command()
 async def skip(ctx):
     global music_queue, current_music
@@ -209,12 +212,12 @@ async def skip(ctx):
 
     if ctx.voice_client.is_playing():
         await ctx.send(f"Pulando a música: **{current_music['title']}**")
-        ctx.voice_client.stop()  # Interrompe a música atual, acionando o `after_playing`
-        current_music = None  # Limpa a música atual
+        ctx.voice_client.stop()
+        current_music = None
     else:
         await ctx.send("Não há nenhuma música tocando no momento.")
 
-#COMANDO PARA MUDAR VOLUME
+
 @commands.command()
 async def volume(ctx):
     if not ctx.voice_client or not ctx.voice_client.source:
@@ -225,7 +228,7 @@ async def volume(ctx):
         await ctx.send("Não é possível ajustar o volume desta fonte de áudio.")
         return
 
-    volume_percentage = int(ctx.voice_client.source.volume * 100)  # Obter volume atual
+    volume_percentage = int(ctx.voice_client.source.volume * 100)
     embed = discord.Embed(
         title="Controle de Volume",
         description=f"Volume atual: **{volume_percentage}%**",
@@ -261,7 +264,6 @@ async def volume(ctx):
             await message.edit(embed=embed)
             break
 
-#COMANDO PARA TIRAR O BOT DA FESTA
 @commands.command()
 async def leave(ctx):
     if not ctx.voice_client:
@@ -281,3 +283,54 @@ async def clear(ctx, quantidade: int):
         return
     deleted = await ctx.channel.purge(limit=quantidade)
     await ctx.send(f"Apaguei {len(deleted)} mensagens.", delete_after=5)
+
+#COMANDO QUE GERA UM BOTÃO
+@commands.command()
+async def botao(ctx:commands.context):
+    async def resposta_botao(interaction: discord.Interaction):
+        await interaction.response.send_message("Botão Pressionado!", ephemeral=True) #ephemeral=True FAZ COM QUE SÓ O USUARIO QUE CLICOU POSSA VER A RESPOSTA
+
+    view = discord.ui.View()
+    botao = discord.ui.Button(label='Botão', style=discord.ButtonStyle.green)
+    botao.callback = resposta_botao
+
+    botao_url = discord.ui.Button(label='Meu Codigo', url='https://github.com/Lucasmassaroto1/botdiscord')
+
+    view.add_item(botao_url)
+    view.add_item(botao)
+    await ctx.reply(view=view)
+
+#COMANDO QUE GERA UM MENU
+@commands.command()
+async def menu(ctx:commands.context):
+    async def select_resposta(interaction: discord.Interaction):
+        escolha = interaction.data['values'][0]
+        jogos = {'1':'Minecraft', '2':'GTA v', '3':'Red Dead Redemption 2'}
+        jogo_escolhido = jogos[escolha]
+        await interaction.response.send_message(f"Voce escolheu {jogo_escolhido}")
+
+    menuSelecao = discord.ui.Select(placeholder='qualquer coisa') #max_values='2' PARA COLOCAR LIMITE DE SELEÇÔES
+    opcoes = [
+        discord.SelectOption(label='Minecraft', value='1'),
+        discord.SelectOption(label='GTA V', value='2'),
+        discord.SelectOption(label='Red Dead Redemption 2', value='3'),
+    ]
+    menuSelecao.options = opcoes
+    menuSelecao.callback = select_resposta
+    view = discord.ui.View()
+    view.add_item(menuSelecao)
+    await ctx.send(view=view)
+
+#COMANDO TESTE DE EMBEDS
+# @commands.command()
+# async def teste(ctx:commands.context):
+#     meu_embed = discord.Embed(title='Meu Embed', description='teste do meu Embed')
+    
+#     imagem_arquivo = discord.File('C:/Users/Lucas Massaroto/Desktop/Projetos/codigobot/image/perfil.png', 'perfil.png')
+#     meu_embed.set_image(url="attachment://perfil.png")
+#     meu_embed.set_thumbnail(url='attachment://perfil.png')
+#     meu_embed.set_footer(text='Meu Footer')
+
+#     meu_embed.color = discord.Color.blue()
+
+#     await ctx.reply(file=imagem_arquivo, embed=meu_embed)
