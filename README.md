@@ -44,6 +44,6 @@ Antes de começar, certifique-se de ter as seguintes ferramentas:
 1. **Execute o bot**:
 
    ```bash
-   python bot.py
+   python bot_launcher.py
     ```
 Desenvolvido por <a href="https://www.tiktok.com/@lucasmassaroto1">@lucasmassaroto1</a>.
