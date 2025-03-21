@@ -4,11 +4,24 @@ from comandos import *
 import os
 import json
 
+base_path = os.path.dirname(os.path.abspath(__file__))
+prefix_path = os.path.join(base_path, 'prefixes.json')
+
+try:
+    with open(prefix_path, "r") as file:
+        prefixes = json.load(file)
+except (FileNotFoundError, json.JSONDecodeError):
+    prefixes = {}
+
+def get_prefix(bot, message):
+    guild_id = str(message.guild.id) if message.guild else "default"
+    return prefixes.get(guild_id, "!")
+
 #__CONFIGURAÇÃO DO BOT__
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
-client = commands.Bot(command_prefix='!', intents=intents)
+client = commands.Bot(command_prefix=get_prefix, intents=intents)# client = commands.Bot(command_prefix='!', intents=intents)
 
 @client.event
 async def on_ready():
@@ -16,6 +29,31 @@ async def on_ready():
     #await client.tree.sync()
     await load_commands()
     print('ByteCode está pronto para uso!')
+
+@client.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        print(f"Comando '{ctx.message.content}' não encontrado.")
+    else:
+        raise error
+    
+# SE CASO ACONTEÇER UM ERRO OU FOR ATUALIZAR O CODIGO
+@client.command(name="reiniciar", help="Reinicia o bot.")
+@commands.has_permissions(administrator=True)
+async def reiniciar(ctx):
+    await ctx.send("Reiniciando o bot...")
+    os._exit(0)
+
+@client.hybrid_command(name="prefix", with_app_command=True, description="Altera o prefixo do bot para o servidor.")
+@commands.has_permissions(administrator=True)
+async def setprefix(ctx: commands.Context, new_prefix: str):
+    guild_id = str(ctx.guild.id)
+    prefixes[guild_id] = new_prefix
+    
+    with open(prefix_path, "w") as file:
+        json.dump(prefixes, file, indent=4)
+    
+    await ctx.send(f"Prefixo alterado para `{new_prefix}` com sucesso!")
 
 async def load_commands():
     from commands import slash
