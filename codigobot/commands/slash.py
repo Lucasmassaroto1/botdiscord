@@ -51,9 +51,11 @@ async def setup(client: discord.Client):
                     "`!setwelcome <canal> <texto> <imagem>`: Configura o canal de boas-vindas."
                 ),
                 "slash":(
-                    "`/invite`: Gera um link para adicionar o ByteCode ao seu server.\n"
-                    "`/sobre`: Envia um texto sobre o ByteCode.\n"
+                    "`/ajuda`: Exibe a lista de comandos do ByteCode.\n"
                     "`/falar`: O ByteCode repete a frase escrita pelo usuario.\n"
+                    "`/invite`: Gera um link para adicionar o ByteCode ao seu server.\n"
+                    "`/prefix`: Permite alterar o prefixo do ByteCode no seu server.\n"
+                    "`/sobre`: Envia um texto sobre o ByteCode.\n"
                     "`/somar <numero1> <numero2>`: O ByteCode faz a soma entre 2 numeros."
                 )
             }
@@ -82,9 +84,11 @@ async def setup(client: discord.Client):
                     "`!setwelcome <channel> <text> <image>`: Sets the welcome channel."
                 ),
                 "slash":(
-                    "`/invite`: Generates a link to add the ByteCode to your server.\n"
-                    "`/sobre`: Send a text about the ByteCode.\n"
+                    "`/ajuda`: Displays the list of ByteCode commands.\n"
                     "`/falar`: The ByteCode repeats the sentence written by the user.\n"
+                    "`/invite`: Generates a link to add the ByteCode to your server.\n"
+                    "`/prefix`: The ByteCode repeats the sentence written by the user.\n"
+                    "`/sobre`: Send a text about the ByteCode.\n"
                     "`/somar <Number1> <Number2>`: ByteCode adds 2 numbers together."
                 )
             }
