@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from comandos import *
+from commands.comandos import *
 import os
 import json
 
@@ -43,7 +43,7 @@ async def on_command_error(ctx, error):
 async def reiniciar(ctx):
     await ctx.send("Reiniciando o bot...")
     os._exit(0)
-
+    
 @client.hybrid_command(name="prefix", with_app_command=True, description="Altera o prefixo do bot para o servidor.")
 @commands.has_permissions(administrator=True)
 async def setprefix(ctx: commands.Context, new_prefix: str):
@@ -53,18 +53,21 @@ async def setprefix(ctx: commands.Context, new_prefix: str):
     with open(prefix_path, "w") as file:
         json.dump(prefixes, file, indent=4)
     
-    await ctx.send(f"Prefixo alterado para `{new_prefix}` com sucesso!")
+    await ctx.send(f"Prefixo alterado para `{new_prefix}` com sucesso!", ephemeral=True)
 
 async def load_commands():
-    from commands import slash
+    from commands import slash, comandos
     await slash.setup(client)
 
 #__SINC SLASH COMMANDS__
-@commands.command()
+@commands.hybrid_command(name="sinc", description="Faz a sincronia dos comandos")
 @commands.has_permissions(administrator=True)
 async def sinc(ctx: commands.Context):
     sincs = await ctx.bot.tree.sync()
-    await ctx.reply(f'Comandos sincronizados: {len(sincs)}')
+    if ctx.interaction:
+        await ctx.interaction.response.send_message(f'Comandos sincronizados: {len(sincs)}', ephemeral=True)
+    else:
+        await ctx.reply(f'Comandos sincronizados: {len(sincs)}')
     print(f'Comandos sincronizados: {len(sincs)}')
 
 client.add_command(sinc)
@@ -143,20 +146,13 @@ async def on_member_join(member):
                 await channel.send(embed=meu_embed)
 
 #__COMANDOS BOT__
-#__COMUNICAÇÃO ENTRE USUARIOS__
 client.add_command(translate)
-
-#__COMANDOS DE DIVERSÃO__
 client.add_command(ppt)
-
-#__COMANDOS DE MÚSICA__
 client.add_command(play)
 client.add_command(stop)
 client.add_command(skip)
 client.add_command(volume)
 client.add_command(leave)
-
-#__COMANDO DE MODERAÇÃO__
 client.add_command(clear)
 client.add_command(botao)
 client.add_command(menu)
