@@ -24,7 +24,7 @@ Antes de começar, certifique-se de ter as seguintes ferramentas:
 
 ## 🛠️ Instalação
 
-  **Obs: para que o bot funcione corretamente a pasta ffmpeg precisa estar na pasta raiz do bot**
+   **Obs: para que o bot funcione corretamente a pasta ``ffmpeg`` precisa estar na pasta commands do bot**
 
 1. **Clone o repositório**:
 
