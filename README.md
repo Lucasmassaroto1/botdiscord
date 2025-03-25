@@ -24,6 +24,8 @@ Antes de começar, certifique-se de ter as seguintes ferramentas:
 
 ## 🛠️ Instalação
 
+ **Obs: a pasta ffmpeg tem que estar na pasta raiz do bot**
+
 1. **Clone o repositório**:
 
    ```bash
