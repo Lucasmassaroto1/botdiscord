@@ -4,7 +4,7 @@ from discord import app_commands
 async def setup(client: discord.Client):
     @client.tree.command(description='Eu responto com um texto sobre mim')
     async def sobre(interaction: discord.Interaction):
-        await interaction.response.send_message('Olá, eu sou o ByteCode, um bot CLT criado para ajudar e entreter os usuários. Posso tocar musicas, traduzindo textos, oferecer jogos e muito mais. Fui desenvolvido por @lucasmassaroto1.', ephemeral=True)
+        await interaction.response.send_message('Olá, sou ByteCode, um simples bot CLT criado para auxiliar e entreter os usuários. Comigo, você pode tocar músicas, traduzir textos, jogar e muito mais. Fui desenvolvido por @Lucasmassaroto1.', ephemeral=True)
 
     @client.tree.command(description='Gera um link para adicionar o ByteCode ao seu server.')
     async def invite(interaction: discord.Interaction):
