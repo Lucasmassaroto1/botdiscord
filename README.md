@@ -1,8 +1,9 @@
 # Codigo Do ByteCode
 Seja bem-vindo(a)!
 
-sou **ByteCode**, um bot CLT criado para auxiliar e entreter os usuários com uma série de funcionalidades, como tocar músicas, traduzir textos, jogar e muito mais.
-Sou um projeto de codigo aberto, permitindo que você faça modificações  e execute sua própria versão do bot localmente no seu computador.
+sou **ByteCode**, um simples bot CLT criado para auxiliar e entreter os usuários. Comigo, você pode tocar músicas, traduzir textos, jogar e muito mais. Fui desenvolvido por **Lucas Massaroto**.
+
+Sou um projeto de codigo aberto, permitindo que qualquer pessoa faça modificações e rode sua própria versão do bot localmente no computador.
 
 ## 🚀 Funcionalidades
 Aqui estão algumas das coisas que posso fazer:
@@ -48,4 +49,4 @@ Antes de começar, certifique-se de ter as seguintes ferramentas:
    ```bash
    python bot_launcher.py
     ```
-Desenvolvido por <a href="https://www.tiktok.com/@lucasmassaroto1">@lucasmassaroto1</a>.
+&copy; Developed By <a href="https://www.tiktok.com/@lucasmassaroto1">Lucas Massaroto</a>.
