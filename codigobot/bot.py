@@ -28,7 +28,7 @@ async def on_ready():
     await client.change_presence(status=discord.Status.idle, activity=discord.Game(name="/ajuda"))
     #await client.tree.sync()
     await load_commands()
-    print('ByteCode está pronto para uso!')
+    print('NOME DO SEU BOT AQUI está pronto para uso!')
 
 @client.event
 async def on_command_error(ctx, error):
@@ -148,11 +148,6 @@ async def on_member_join(member):
 #__COMANDOS BOT__
 client.add_command(translate)
 client.add_command(ppt)
-client.add_command(play)
-client.add_command(stop)
-client.add_command(skip)
-client.add_command(volume)
-client.add_command(leave)
 client.add_command(clear)
 client.add_command(botao)
 client.add_command(menu)

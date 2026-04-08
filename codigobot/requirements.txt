@@ -1,9 +1,5 @@
 discord.py
-discord[voice]
 discord-components
 PyNaCl
-youtube-dl
-urllib3
 googletrans
 googletrans==4.0.0-rc1
-ffmpeg
